@@ -1,0 +1,76 @@
+# Step 1: Use Ubuntu as base image
+FROM ubuntu:20.04
+
+# Step 2: Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
+RUN apt-get upgrade -y
+RUN apt-get -y install openssh-server sudo
+RUN apt-get -y install vsftpd
+RUN apt-get -y install ftp
+RUN apt-get -y install curl
+RUN apt-get -y install nmap
+
+RUN apt-get update \
+    && apt-get install -y mongodb-clients curl
+
+COPY ./vsftpd.conf /etc/vsftpd.conf
+RUN chmod 644 /etc/vsftpd.conf
+COPY ./addon/start.sh /start.sh
+RUN chmod +x /start.sh
+
+# เพิ่มผู้ใช้ และให้สิทธิ์ sudo
+RUN useradd -ms /bin/bash admin \
+    && PASS=$(curl -s https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Leaked-Databases/rockyou-20.txt | shuf -n 1) \
+    && echo "admin:$PASS" | chpasswd \
+    && usermod -aG sudo admin \
+    && mkdir -p /home/admin/.ssh \
+    && sudo chown admin:admin /home/admin/.ssh \
+    && sudo chmod 755 /home/admin/.ssh \
+    && echo "$PASS" > /home/admin/.ssh/pass.txt \
+    && chmod 600 /home/admin/.ssh/pass.txt
+
+#gen key admin for FTP
+COPY ./addon/file1 /home/admin/.ssh/rsa_admin_key
+COPY ./addon/file2 /home/admin/.ssh/rsa_admin_key.pub
+RUN sudo chmod 755 /home/admin/.ssh/rsa_admin_key
+RUN sudo chmod 755 /home/admin/.ssh/rsa_admin_key.pub
+RUN sudo chown admin:admin /home/admin/.ssh/rsa_admin_key
+RUN sudo chown admin:admin /home/admin/.ssh/rsa_admin_key.pub
+RUN cat /home/admin/.ssh/rsa_admin_key.pub >> /home/admin/.ssh/authorized_keys
+
+#add file ให้ FTp user
+COPY ./addon/file1 /home/helloAnomymouse/ftp/.ssh_admin/rsa_admin_key
+COPY ./addon/file2 /home/helloAnomymouse/ftp/.ssh_admin/rsa_admin_key.pub
+COPY ./addon/file3 /home/helloAnomymouse/ftp/helloAnomymouse.txt
+RUN chmod +r /home/helloAnomymouse/ftp/helloAnomymouse.txt
+RUN chmod +r /home/helloAnomymouse/ftp/.ssh_admin/rsa_admin_key.pub
+RUN chmod +r /home/helloAnomymouse/ftp/.ssh_admin/rsa_admin_key
+
+
+RUN sudo mkdir -p /home/helloAnomymouse/ftp
+RUN sudo chown ftp:ftp /home/helloAnomymouse/ftp
+RUN sudo chmod 755 /home/helloAnomymouse/ftp
+
+RUN sudo chmod a-w /home/helloAnomymouse/ftp
+
+RUN service ssh start
+
+
+COPY ./addon/start.sh /start.sh
+COPY ./vsftpd.conf /etc/vsftpd.conf
+RUN chmod 644 /etc/vsftpd.conf
+
+RUN chmod +x /start.sh
+
+# Step 7: Expose ports
+EXPOSE 20-21
+EXPOSE 22
+EXPOSE 3000
+EXPOSE 40000-40009:40000-40009
+
+
+# Step 8: Start services using Supervisor
+
+CMD ["/start.sh","bash", "-c", "sleep 10 && mongo --host mongo:27017 --eval 'db.stats()'"]

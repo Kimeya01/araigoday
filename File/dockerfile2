@@ -1,0 +1,47 @@
+# Dockerfile.rocketchat
+FROM rocketchat/rocket.chat:3.12.1
+USER root
+
+# Update the repository sources and remove debian-security
+RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list \
+    && sed -i '/deb http:\/\/security.debian.org\/debian-security/d' /etc/apt/sources.list
+
+# Install necessary packages
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get -y install curl coreutils mongo-tools
+
+# Generate a random flag and store it in /root/flag.txt
+RUN FLAG=$(curl -s https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Leaked-Databases/rockyou-20.txt | shuf -n 1) \
+    && echo "CTF{$FLAG}" > /root/flag.txt
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
+RUN apt-get upgrade -y
+RUN apt-get -y install openssh-server sudo
+RUN apt-get -y install vsftpd
+RUN apt-get -y install ftp
+RUN apt-get -y install curl
+
+RUN service ssh start
+
+RUN useradd -ms /bin/bash sshuser \
+    && PASS=$(curl -s https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Leaked-Databases/rockyou-20.txt | shuf -n 1) \
+    && echo "sshuser:$PASS" | chpasswd \
+    && mkdir -p /home/sshuser/.ssh \
+    && ssh-keygen -q -t rsa -N "$PASS" -f /home/sshuser/.ssh/id_rsa \
+    && chown -R sshuser:sshuser /home/sshuser/.ssh \
+    && chmod 700 /home/sshuser/.ssh \
+    && chmod 600 /home/sshuser/.ssh/id_rsa* \
+    && echo "$PASS" > /home/sshuser/.ssh/pass.txt \
+    && chmod 600 /home/sshuser/.ssh/pass.txt \
+    && cat /home/sshuser/.ssh/id_rsa.pub >> /home/sshuser/.ssh/authorized_keys
+
+
+EXPOSE 22
+EXPOSE 3000
+EXPOSE 27017
+
+
+
