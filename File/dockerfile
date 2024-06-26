@@ -11,14 +11,10 @@ RUN apt-get -y install vsftpd
 RUN apt-get -y install ftp
 RUN apt-get -y install curl
 RUN apt-get -y install nmap
+RUN apt-get -y install net-tools
 
 RUN apt-get update \
     && apt-get install -y mongodb-clients curl
-
-COPY ./vsftpd.conf /etc/vsftpd.conf
-RUN chmod 644 /etc/vsftpd.conf
-COPY ./addon/start.sh /start.sh
-RUN chmod +x /start.sh
 
 # เพิ่มผู้ใช้ และให้สิทธิ์ sudo
 RUN useradd -ms /bin/bash admin \
@@ -58,7 +54,7 @@ RUN sudo chmod a-w /home/helloAnomymouse/ftp
 RUN service ssh start
 
 
-COPY ./addon/start.sh /start.sh
+COPY ./start.sh /start.sh
 COPY ./vsftpd.conf /etc/vsftpd.conf
 RUN chmod 644 /etc/vsftpd.conf
 
