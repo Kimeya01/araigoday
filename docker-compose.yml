@@ -73,6 +73,8 @@ services:
     build:
       context: ./File
       dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
     depends_on:
       - mongo
     environment:
