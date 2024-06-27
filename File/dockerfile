@@ -25,16 +25,15 @@ RUN useradd -ms /bin/bash admin \
     && usermod -aG sudo admin \
     && mkdir -p /home/admin/.ssh \
     && sudo chown admin:admin /home/admin/.ssh \
-    && sudo chmod 755 /home/admin/.ssh \
-    && echo "$PASS" > /home/admin/.ssh/pass.txt \
-    && chmod 600 /home/admin/.ssh/pass.txt
+    && sudo chmod 755 /home/admin/.ssh 
+    # && echo "$PASS" > /home/admin/.ssh/pass.txt \
+    # && chmod 600 /home/admin/.ssh/pass.txt
 
 # เพิ่ม genkey ใหม่
 RUN PASS=$(curl -s https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/500-worst-passwords.txt | shuf -n 1) \ 
     && ssh-keygen -q -t rsa -N "$PASS" -f /home/admin/.ssh/rsa_admin_key \
-    && echo "$PASS" > /home/admin/.ssh/passphase.txt \
-    && chmod 600 /home/admin/.ssh/rsa_admin_key \
-    && chmod 600 /home/admin/.ssh/passphase.txt
+    # && echo "$PASS" > /home/admin/.ssh/passphase.txt \
+    && chmod 600 /home/admin/.ssh/rsa_admin_key 
 
 #gen key admin for FTP
 # COPY ./addon/file1 /home/admin/.ssh/rsa_admin_key
@@ -52,9 +51,9 @@ RUN cat /home/admin/.ssh/rsa_admin_key.pub >> /home/admin/.ssh/authorized_keys
 RUN sudo mkdir -p /home/helloAnomymouse/ftp/.ssh_admin
 COPY ./addon/file3 /home/helloAnomymouse/ftp/helloAnomymouse.txt
 RUN cp /home/admin/.ssh/rsa_admin_key /home/helloAnomymouse/ftp/.ssh_admin/rsa_admin_key
-RUN cp /home/admin/.ssh/rsa_admin_key.pub /home/helloAnomymouse/ftp/.ssh_admin/rsa_admin_key.pub
+# RUN cp /home/admin/.ssh/rsa_admin_key.pub /home/helloAnomymouse/ftp/.ssh_admin/rsa_admin_key.pub
 RUN chmod +r /home/helloAnomymouse/ftp/helloAnomymouse.txt
-RUN chmod +r /home/helloAnomymouse/ftp/.ssh_admin/rsa_admin_key.pub
+# RUN chmod +r /home/helloAnomymouse/ftp/.ssh_admin/rsa_admin_key.pub
 RUN chmod +r /home/helloAnomymouse/ftp/.ssh_admin/rsa_admin_key
 
 

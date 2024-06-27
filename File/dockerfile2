@@ -18,6 +18,7 @@ RUN FLAG=$(curl -s https://raw.githubusercontent.com/danielmiessler/SecLists/mas
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+
 RUN apt-get update
 RUN apt-get upgrade -y
 RUN apt-get -y install openssh-server sudo
@@ -25,8 +26,8 @@ RUN apt-get -y install vsftpd
 RUN apt-get -y install ftp
 RUN apt-get -y install curl
 
+
 EXPOSE 3000
 EXPOSE 27017
-
 
 

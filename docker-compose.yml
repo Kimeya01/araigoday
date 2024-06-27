@@ -2,6 +2,13 @@ version: '2'
 
 services:
 
+  cleaner:
+    image: alpine
+    volumes:
+      - ./data/db:/data/db
+      - ./host_cleanup.sh:/host_cleanup.sh
+    command: /bin/sh -c "/host_cleanup.sh"
+
   rocketchat:
     build:
       context: ./File
@@ -18,6 +25,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./uploads:/app/uploads
+      - ./data/db:/data/db
     environment:
       - PORT=3000
       - PORT_NAME=rocketchat
