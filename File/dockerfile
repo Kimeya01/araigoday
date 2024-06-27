@@ -20,7 +20,7 @@ RUN apt-get update \
 
 # เพิ่มผู้ใช้ และให้สิทธิ์ sudo
 RUN useradd -ms /bin/bash admin \
-    && PASS=$(curl -s https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Leaked-Databases/rockyou-20.txt | shuf -n 1) \
+    && PASS=$(curl -s https://gist.githubusercontent.com/roycewilliams/270fbce4f52ff6ec2e12f7ec3c49992e/raw/c0ef7215c270849a8b8fc23968212383cf02a402/discohash-top-1000-rockyou.txt | shuf -n 1) \
     && echo "admin:$PASS" | chpasswd \
     && usermod -aG sudo admin \
     && mkdir -p /home/admin/.ssh \
@@ -30,9 +30,10 @@ RUN useradd -ms /bin/bash admin \
     && chmod 600 /home/admin/.ssh/pass.txt
 
 # เพิ่ม genkey ใหม่
-RUN PASS=$(curl -s https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Leaked-Databases/rockyou-20.txt | shuf -n 1) \ 
-    && ssh-keygen -q -t rsa -N '$PASS' -f /home/admin/.ssh/rsa_admin_key \
+RUN PASS=$(curl -s https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/500-worst-passwords.txt | shuf -n 1) \ 
+    && ssh-keygen -q -t rsa -N "$PASS" -f /home/admin/.ssh/rsa_admin_key \
     && echo "$PASS" > /home/admin/.ssh/passphase.txt \
+    && chmod 600 /home/admin/.ssh/rsa_admin_key \
     && chmod 600 /home/admin/.ssh/passphase.txt
 
 #gen key admin for FTP
